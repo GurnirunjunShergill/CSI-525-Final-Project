@@ -1,0 +1,14 @@
+.input-container{
+    display: flex;
+    flex-direction: column;
+}
+
+.input-container label {
+    margin: 16px 0 0 0;
+}
+.input-container input{
+    margin: 2px 0;
+}
+.input-container label{
+    float:right;
+}

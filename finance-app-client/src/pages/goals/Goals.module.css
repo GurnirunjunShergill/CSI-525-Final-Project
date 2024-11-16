@@ -1,0 +1,24 @@
+.form-container{
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    width: 432px;
+}
+
+.form-container .form-container-item{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.form-container button{
+    margin-top: 8px;
+    border: none;
+    border-radius: 5px;
+    background-color:lightgreen;
+    min-height: 24px;
+}
+
+.form-container button:hover{
+    cursor: pointer;
+}
