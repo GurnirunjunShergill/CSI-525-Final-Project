@@ -7,6 +7,7 @@ import { BudgetDataType } from "./types/BudgetDataType";
 import Home from "./pages/home/Home";
 import {pageList} from './Constants';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import '../stylesheet.css';
 
 const App = () =>{
     const [budgetData, setBudgetData] = useState<BudgetDataType>()
