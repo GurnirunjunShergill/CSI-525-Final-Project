@@ -1,0 +1,10 @@
+.add-finances form{
+    display: flex;
+    flex-direction: column;
+    width: 432px;
+}
+
+.add-finances form .add-finance-item{
+    display: flex;
+    flex-direction: column;
+}

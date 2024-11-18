@@ -5,7 +5,8 @@ import { BudgetDataType } from "../../types/BudgetDataType";
 import BudgetOverview from "../budget-overview/BudgetOverview";
 import Goals from "../goals/Goals";
 import Login from "../account-pages/login/Login";
-
+import NavigationBar from "../../components/navigation-bar/NavigationBar";
+import './home.css';
 
 // home page should include 
 // add finance tab
@@ -28,10 +29,6 @@ const Home = ({
     displayedPage
 }:displayedPagePropsType) =>{
     const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-
-    const changePage = (page:string) =>{
-        setDisplayedPage(page)
-    }
     const pages = {
         AddFinance: <AddFinances budgetData={budgetData} setBudgetData={setBudgetData}/>,
         Goals: <Goals budgetData={budgetData} setBudgetData={setBudgetData}/>,
@@ -40,20 +37,10 @@ const Home = ({
 
     return(
         <>
-        { isLoggedIn ? <div>
-            <button onClick={()=>changePage(pageList.goalsPage)}>
-                Goals
-            </button>
-            {budgetData?.goals &&  <button onClick={()=>changePage(pageList.addFinancePage)}>
-                Add finances
-            </button>}
-            {budgetData?.goals && budgetData?.budgets &&  <button onClick={()=>changePage(pageList.budgetOverviewPage)}>
-                Budget Overview
-            </button>}
+        <NavigationBar isLoggedIn={isLoggedIn} setDisplayedPage={setDisplayedPage} budgetData={budgetData} setBudgetData={setBudgetData} displayedPage={displayedPage}/>
+        <div className='content'>
+            {isLoggedIn ? pages[displayedPage as keyof typeof pages] : <Login setIsLoggedIn={setIsLoggedIn}/> }
         </div>
-        :<Login setIsLoggedIn={setIsLoggedIn}/> 
-        }
-        {isLoggedIn && pages[displayedPage as keyof typeof pages]}
         </>
     )
 }

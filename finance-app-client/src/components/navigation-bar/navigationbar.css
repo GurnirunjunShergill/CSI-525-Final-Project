@@ -1,0 +1,28 @@
+.navigation-bar{
+    min-height: 96px;
+    background-color: #26292C;
+    display: flex;
+    padding: 0 16px;
+    align-items: center;
+}
+
+.navigation-bar h1{
+    margin: 0;
+}
+
+.navigation-bar .page-list{
+    margin: 0 108px;
+
+}
+
+.navigation-bar button{
+    border: none;
+    font-size: 20px;
+    color: inherit;
+    background-color: transparent;
+    margin: 0 16px;
+}
+
+.navigation-bar button:hover{
+    cursor: pointer;
+}
