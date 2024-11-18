@@ -3,7 +3,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useState } from "react";
 import {auth} from '../../../firebase';
 
-const Login = ({ setIsLoggedIn }: any) => {
+const Login = ({ setIsLoggedIn, setUserData }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -29,6 +29,18 @@ const Login = ({ setIsLoggedIn }: any) => {
       },
       body: JSON.stringify({ email, password }),
     });
+
+    if(response.status === 200){
+      const data = await response.json();
+      setUserData({
+        email: email,
+        password: password,
+        userName: data.username
+      })
+      setIsLoggedIn(true);
+    }else if(response.status === 400){
+      console.log('login failed handle that here')
+    }
   };
 
   return (

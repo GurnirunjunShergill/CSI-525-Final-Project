@@ -2,6 +2,12 @@
     min-height: 96px;
     background-color: #26292C;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navigation-bar-left-content{
+    display: flex;
     padding: 0 16px;
     align-items: center;
 }

@@ -23,25 +23,30 @@ const NavigationBar = ({
   };
 
   return (
-    <div className='navigation-bar'>
-      <h1>Finance-App</h1>
-      <div className='page-list'>
-        {isLoggedIn && (
+    <div className="navigation-bar">
+      <div className="navigation-bar-left-content">
+        <h1>Finance-App</h1>
+        <div className="page-list">
+          {isLoggedIn && (
             <>
-            <button onClick={() => changePage(pageList.goalsPage)}>Goals</button>
-            {budgetData?.goals && (
+              <button onClick={() => changePage(pageList.goalsPage)}>
+                Goals
+              </button>
+              {budgetData?.goals && (
                 <button onClick={() => changePage(pageList.addFinancePage)}>
-                Add finances
+                  Add finances
                 </button>
-            )}
-            {budgetData?.goals && budgetData?.budgets && (
+              )}
+              {budgetData?.goals && budgetData?.budgets && (
                 <button onClick={() => changePage(pageList.budgetOverviewPage)}>
-                Budget Overview
+                  Budget Overview
                 </button>
-            )}
+              )}
             </>
-        )}
+          )}
+        </div>
       </div>
+      {isLoggedIn && <button onClick={()=>setDisplayedPage(pageList.profilePage)} className="profile-button">Profile</button>}
     </div>
   );
 };

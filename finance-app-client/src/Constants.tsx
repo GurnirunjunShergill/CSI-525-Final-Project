@@ -2,7 +2,8 @@ export const pageList = {
     addFinancePage: 'AddFinance',
     budgetOverviewPage: 'BudgetOverview',
     goalsPage: 'Goals',
-    homePage: 'home-page'
+    homePage: 'home-page',
+    profilePage:'Profile',
 }
 
 export const monthList:{[key: string]: {name: string; lastDayOfMonth: number; leapYear?:number;}} = {

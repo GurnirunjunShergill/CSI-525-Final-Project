@@ -11,6 +11,7 @@ import { auth } from './firebase';
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 const App = () =>{
+    const [userData, setUserData] = useState({});
     const [budgetData, setBudgetData] = useState<BudgetDataType>()
     const [displayedPage, setDisplayedPage] = useState<string>(pageList.homePage);
 
@@ -30,7 +31,7 @@ const App = () =>{
     return(
         <>
             {/* <GoogleOAuthProvider clientId="650685810723-l19l4n0ur2o51r3kb879e86gk7bm0d1k.apps.googleusercontent.com"> */}
-                <Home setDisplayedPage={setDisplayedPage} displayedPage={displayedPage} budgetData={budgetData} setBudgetData={setBudgetData}/>
+                <Home setUserData={setUserData} setDisplayedPage={setDisplayedPage} displayedPage={displayedPage} budgetData={budgetData} setBudgetData={setBudgetData}/>
             {/* </GoogleOAuthProvider> */}
         </>
     )

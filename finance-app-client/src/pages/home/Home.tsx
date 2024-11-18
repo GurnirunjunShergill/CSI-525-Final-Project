@@ -20,26 +20,29 @@ interface displayedPagePropsType {
     budgetData: BudgetDataType;
     setBudgetData: React.Dispatch<React.SetStateAction<BudgetDataType>>;
     displayedPage: string;
+    setUserData: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const Home = ({
     setDisplayedPage,
     budgetData,
     setBudgetData,
-    displayedPage
+    displayedPage,
+    setUserData,
 }:displayedPagePropsType) =>{
     const [isLoggedIn, setIsLoggedIn] = React.useState(false);
     const pages = {
         AddFinance: <AddFinances budgetData={budgetData} setBudgetData={setBudgetData}/>,
         Goals: <Goals budgetData={budgetData} setBudgetData={setBudgetData}/>,
         BudgetOverview: <BudgetOverview budgetData={budgetData}/>
+        
     }
 
     return(
         <>
         <NavigationBar isLoggedIn={isLoggedIn} setDisplayedPage={setDisplayedPage} budgetData={budgetData} setBudgetData={setBudgetData} displayedPage={displayedPage}/>
         <div className='content'>
-            {isLoggedIn ? pages[displayedPage as keyof typeof pages] : <Login setIsLoggedIn={setIsLoggedIn}/> }
+            {isLoggedIn ? pages[displayedPage as keyof typeof pages] : <Login setUserData={setUserData} setIsLoggedIn={setIsLoggedIn}/> }
         </div>
         </>
     )
