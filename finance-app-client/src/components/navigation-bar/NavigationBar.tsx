@@ -46,8 +46,12 @@ const NavigationBar = ({
           )}
         </div>
       </div>
-      {isLoggedIn && <button onClick={()=>setDisplayedPage(pageList.profilePage)} className="profile-button">Profile</button>}
-    </div>
+      {isLoggedIn && <div>
+      <button onClick={()=>setDisplayedPage(pageList.profilePage)} className="profile-button">Profile</button>
+      <button onClick={()=>{}} className="profile-button">Logout</button>
+    </div>}
+      </div>
+      
   );
 };
 export default NavigationBar;

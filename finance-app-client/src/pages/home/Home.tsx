@@ -7,6 +7,7 @@ import Goals from "../goals/Goals";
 import Login from "../account-pages/login/Login";
 import NavigationBar from "../../components/navigation-bar/NavigationBar";
 import './home.css';
+import Profile from "../account-pages/profile/Profile";
 
 // home page should include 
 // add finance tab
@@ -21,6 +22,7 @@ interface displayedPagePropsType {
     setBudgetData: React.Dispatch<React.SetStateAction<BudgetDataType>>;
     displayedPage: string;
     setUserData: React.Dispatch<React.SetStateAction<any>>;
+    userData: any;
 }
 
 const Home = ({
@@ -29,13 +31,14 @@ const Home = ({
     setBudgetData,
     displayedPage,
     setUserData,
+    userData,
 }:displayedPagePropsType) =>{
     const [isLoggedIn, setIsLoggedIn] = React.useState(false);
     const pages = {
         AddFinance: <AddFinances budgetData={budgetData} setBudgetData={setBudgetData}/>,
-        Goals: <Goals budgetData={budgetData} setBudgetData={setBudgetData}/>,
-        BudgetOverview: <BudgetOverview budgetData={budgetData}/>
-        
+        Goals: <Goals userData={userData} budgetData={budgetData} setBudgetData={setBudgetData}/>,
+        BudgetOverview: <BudgetOverview budgetData={budgetData}/>,
+        Profile: <Profile setUserData={setUserData} userData={userData}/>
     }
 
     return(

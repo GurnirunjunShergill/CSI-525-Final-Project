@@ -90,7 +90,9 @@ const updateUser = async (email, updatedUserData) => {
     const userIndexToBeUpdated = users.findIndex((user) => user.email === email);
     usersCopy[userIndexToBeUpdated] = { ...usersCopy[userIndexToBeUpdated], ...updatedUserData }
     await addUser(usersCopy, true)
+    return true;
   }
+  return false;
 }
 
 app.post('/', verifyIdToken, async (req, res) => {
@@ -128,27 +130,37 @@ app.post('/', verifyIdToken, async (req, res) => {
 })
 
 app.post('/login', verifyIdToken, async (req, res) => {
-  const {email, password} = req.body
+  const {email, password} = req.body;
   const {isLoggedIn, userIndex, username} = await login(email, password);
   return isLoggedIn ? res.status(200).json({message: 'all done you did it', username: username}) : res.status(400).json({message: 'not logged in'})
 })
 
 app.post('/add-user', async (req, res) => {
-  await updateUser('gurnirunjun.shergill@gmail.com', { username: 'gurn' });
-  res.send('Got a POST request')
+  const {email, password, username} = req.body;
+  await addUser([{email: email, username: username, password: password }]);
+  return res.status(200).json({message: 'user added'});
 })
 
-app.put('/update-user', (req, res) => {
-  res.send('Got a PUT request at /user')
+app.post('/update-user', async(req, res) => {
+  const {email, username, password} = req.body;
+  const successful = await updateUser(email, {username: username, password: password})
+  return successful ? res.status(200).json({message: 'profile updated'}) : res.status(400).json({message: 'could not find user with that email'});
 })
 
-app.delete('/delete-user', async (req, res) => {
-  await deleteUser('gurnirunjun.shergill1@gmail.com')
-  res.send('Got a DELETE request at /user')
+app.post('/delete-user', async (req, res) => {
+  const {email} = req.body;
+  await deleteUser(email)
+  return res.status(200).json({message: 'user deleted'});
 })
 
 
 // *** Budget *** //
+
+const getAllBudgets = async () =>{
+  const collection = database.collection('database');
+  const existingBudgets = await collection.doc('budget').get();
+  return existingBudgets;
+}
 
 const getBudget = async (email, budgetName) => {
   // get database data
@@ -182,8 +194,7 @@ const getBudget = async (email, budgetName) => {
 }
 
 const addBudget = async (budgetData) =>{
-  const collection = database.collection('database');
-  const existingBudgets = await collection.doc('budget').get();
+  const existingBudgets = await getAllBudgets();
   const {budgets} = existingBudgets.data();
   await collection.doc('budget').set(
     {
@@ -205,11 +216,13 @@ const updateBudget = async(budgetData, budgetIndex) =>{
   );
 }
 
-const addGoal = async (email, goalData, budgetName) => {
+const addGoal = async ({email, goalData, budgetName}) => {
   const existingUserData = await getUser();
   const {users} = existingUserData.data();
-  const userIndex = users.findIndex((user)=>user.email === email)
+  const userIndex = users.findIndex((user) => user.email === email);
+
   if(userIndex > -1){
+    console.log('made it inside the if statement')
     const user = users[userIndex];
     addBudget({
       goal: {...goalData},
@@ -245,19 +258,45 @@ const updateGoal = async (email, goalData, budgetName) => {
   }
 }
 
-app.post('/add-user', async (req, res) => {
-  await updateUser('gurnirunjun.shergill@gmail.com', { username: 'gurn' });
-  res.send('Got a POST request')
+const addToExistingBudget = async ({email, budgetData, budgetName}) =>{
+  const [budgetIndex, budget] = await getBudget(email,budgetName);
+  // you have the actual budget data in the database
+  // you have the updated budget data
+  // you need to combine them and then add them to the database
+  const updatedBudget = {budget, ...budgetData}
+  const existingBudgets = await getAllBudgets();
+  const {budgets} = existingBudgets.data();
+  // we need to replace the index of the budget with the updated budget data
+    budgets[budgetIndex] = updatedBudget
+    // and then we need to update the database with the new budget
+  await collection.doc('budget').set(
+    {
+      budgets: [...budgets]
+    }
+  );
+
+}
+
+app.post('/add-goal', async (req, res) => {
+  const {email, budgetData, budgetName} = req.body;
+  await addGoal({email: email, goalData: budgetData, budgetName: budgetName});
+  return res.status(200).json({message: 'goal added'});
+})
+
+app.post('/add-budget', async (req, res) => {
+  const {email, budgetData, budgetName} = req.body;
+  await addToExistingBudget({email: email, goalData: budgetData, budgetName: budgetName});
+  return res.status(200).json({message: 'budget added'});
 })
 
 app.put('/update-user', (req, res) => {
   res.send('Got a PUT request at /user')
 })
 
-app.delete('/delete-user', async (req, res) => {
-  await deleteUser('gurnirunjun.shergill1@gmail.com')
-  res.send('Got a DELETE request at /user')
-})
+// app.delete('/delete-user', async (req, res) => {
+//   await deleteUser('gurnirunjun.shergill1@gmail.com')
+//   res.send('Got a DELETE request at /user')
+// })
 
 
 app.listen(port, () => {
