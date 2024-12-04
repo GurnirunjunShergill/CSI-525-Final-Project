@@ -6,8 +6,8 @@ import styles from './Goals.module.css';
 import { auth } from "../../firebase";
 
 interface GoalsPropsType {
-    budgetData: BudgetDataType;
-    setBudgetData: React.Dispatch<React.SetStateAction<BudgetDataType>>;
+    budgetData: any;
+    setBudgetData: React.Dispatch<React.SetStateAction<any>>;
     userData: any
 }
 

@@ -195,6 +195,7 @@ const getBudget = async (email, budgetName) => {
 
 const addBudget = async (budgetData) =>{
   const existingBudgets = await getAllBudgets();
+  const collection = database.collection('database');
   const {budgets} = existingBudgets.data();
   await collection.doc('budget').set(
     {
@@ -204,7 +205,6 @@ const addBudget = async (budgetData) =>{
 }
 
 const updateBudget = async(budgetData, budgetIndex) =>{
-  const collection = database.collection('database');
   const existingBudgets = await collection.doc('budget').get();
   const {budgets} = existingBudgets.data();
   let updatedBudget = budgets;
@@ -222,7 +222,6 @@ const addGoal = async ({email, goalData, budgetName}) => {
   const userIndex = users.findIndex((user) => user.email === email);
 
   if(userIndex > -1){
-    console.log('made it inside the if statement')
     const user = users[userIndex];
     addBudget({
       goal: {...goalData},
@@ -247,6 +246,13 @@ const addGoal = async ({email, goalData, budgetName}) => {
   }
 }
 
+const getBudgetData = async(email) =>{
+  const existingBudgets = await getAllBudgets();
+  const {budgets} = existingBudgets.data();
+  const filteredBudgets = budgets.filter((budget) => budget?.users?.owner === email || budget?.users?.['read-access'] === email || budget?.users?.['write-access'] === email);
+  return filteredBudgets;
+}
+
 const updateGoal = async (email, goalData, budgetName) => {
   const existingUserData = await getUser();
   const {users} = existingUserData.data();
@@ -259,22 +265,17 @@ const updateGoal = async (email, goalData, budgetName) => {
 }
 
 const addToExistingBudget = async ({email, budgetData, budgetName}) =>{
-  const [budgetIndex, budget] = await getBudget(email,budgetName);
+  const collection = database.collection('database');
   // you have the actual budget data in the database
   // you have the updated budget data
   // you need to combine them and then add them to the database
-  const updatedBudget = {budget, ...budgetData}
-  const existingBudgets = await getAllBudgets();
-  const {budgets} = existingBudgets.data();
   // we need to replace the index of the budget with the updated budget data
-    budgets[budgetIndex] = updatedBudget
     // and then we need to update the database with the new budget
   await collection.doc('budget').set(
     {
-      budgets: [...budgets]
+      budgets: [...budgetData]
     }
   );
-
 }
 
 app.post('/add-goal', async (req, res) => {
@@ -285,8 +286,14 @@ app.post('/add-goal', async (req, res) => {
 
 app.post('/add-budget', async (req, res) => {
   const {email, budgetData, budgetName} = req.body;
-  await addToExistingBudget({email: email, goalData: budgetData, budgetName: budgetName});
-  return res.status(200).json({message: 'budget added'});
+  await addToExistingBudget({email: email, budgetData: budgetData, budgetName: budgetName});
+  return res.status(200).json({budgetData: budgetData});
+})
+
+app.post('/budget-overview', async(req, res) =>{
+  const {email} = req.body;
+  const budgetData = await getBudgetData(email);
+  return res.status(200).json({budgetData: budgetData});
 })
 
 app.put('/update-user', (req, res) => {

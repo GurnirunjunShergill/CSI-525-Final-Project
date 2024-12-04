@@ -8,6 +8,7 @@ import Login from "../account-pages/login/Login";
 import NavigationBar from "../../components/navigation-bar/NavigationBar";
 import './home.css';
 import Profile from "../account-pages/profile/Profile";
+import { useState } from "react";
 
 // home page should include 
 // add finance tab
@@ -18,8 +19,6 @@ import Profile from "../account-pages/profile/Profile";
 
 interface displayedPagePropsType {
     setDisplayedPage: React.Dispatch<React.SetStateAction<string>>;
-    budgetData: BudgetDataType;
-    setBudgetData: React.Dispatch<React.SetStateAction<BudgetDataType>>;
     displayedPage: string;
     setUserData: React.Dispatch<React.SetStateAction<any>>;
     userData: any;
@@ -27,17 +26,19 @@ interface displayedPagePropsType {
 
 const Home = ({
     setDisplayedPage,
-    budgetData,
-    setBudgetData,
     displayedPage,
     setUserData,
     userData,
 }:displayedPagePropsType) =>{
-    const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [budgetData, setBudgetData] = useState<any>()
+    const [selectedBudget, setSelectedBudget] = useState();
+    const [selectedBudgetIndex, setSelectedBudgetIndex] = useState();
+
     const pages = {
-        AddFinance: <AddFinances budgetData={budgetData} setBudgetData={setBudgetData}/>,
+        AddFinance: <AddFinances selectedBudgetIndex={selectedBudgetIndex} budgetData={budgetData} setBudgetData={setBudgetData} userData={userData} selectedBudget={selectedBudget} setSelectedBudget={setSelectedBudget}/>,
         Goals: <Goals userData={userData} budgetData={budgetData} setBudgetData={setBudgetData}/>,
-        BudgetOverview: <BudgetOverview budgetData={budgetData}/>,
+        BudgetOverview: <BudgetOverview setSelectedBudgetIndex={setSelectedBudgetIndex} setDisplayedPage={setDisplayedPage} budgetData={budgetData} setSelectedBudget={setSelectedBudget} selectedBudget={selectedBudget}/>,
         Profile: <Profile setUserData={setUserData} userData={userData}/>
     }
 
@@ -45,7 +46,7 @@ const Home = ({
         <>
         <NavigationBar isLoggedIn={isLoggedIn} setDisplayedPage={setDisplayedPage} budgetData={budgetData} setBudgetData={setBudgetData} displayedPage={displayedPage}/>
         <div className='content'>
-            {isLoggedIn ? pages[displayedPage as keyof typeof pages] : <Login setUserData={setUserData} setIsLoggedIn={setIsLoggedIn}/> }
+            {isLoggedIn ? pages[displayedPage as keyof typeof pages] : <Login setUserData={setUserData} setIsLoggedIn={setIsLoggedIn} setBudgetData={setBudgetData} budgetData={budgetData}/> }
         </div>
         </>
     )

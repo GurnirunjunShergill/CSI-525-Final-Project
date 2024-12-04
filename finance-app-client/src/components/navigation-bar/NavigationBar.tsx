@@ -1,13 +1,12 @@
 import * as React from "react";
 import "./navigationbar.css";
-import { BudgetDataType } from "../../types/BudgetDataType";
 import { pageList } from "../../Constants";
 
 interface NavigationBarPropsType {
   isLoggedIn: boolean;
   setDisplayedPage: React.Dispatch<React.SetStateAction<string>>;
-  budgetData: BudgetDataType;
-  setBudgetData: React.Dispatch<React.SetStateAction<BudgetDataType>>;
+  budgetData: any;
+  setBudgetData: any;
   displayedPage: string;
 }
 
@@ -29,29 +28,45 @@ const NavigationBar = ({
         <div className="page-list">
           {isLoggedIn && (
             <>
-              <button onClick={() => changePage(pageList.goalsPage)}>
-                Goals
-              </button>
-              {budgetData?.goals && (
-                <button onClick={() => changePage(pageList.addFinancePage)}>
+              {budgetData && (
+                <>
+                  {/* <button onClick={() => changePage(pageList.addFinancePage)}>
                   Add finances
-                </button>
+                </button> */}
+                  <button
+                    onClick={() => changePage(pageList.budgetOverviewPage)}
+                  >
+                    Budget Overview
+                  </button>
+                </>
               )}
-              {budgetData?.goals && budgetData?.budgets && (
+              <button onClick={() => changePage(pageList.goalsPage)}>
+                Add Budget
+              </button>
+
+              {/* {budgetData?.goals && budgetData?.budgets && (
                 <button onClick={() => changePage(pageList.budgetOverviewPage)}>
                   Budget Overview
                 </button>
-              )}
+              )} */}
             </>
           )}
         </div>
       </div>
-      {isLoggedIn && <div>
-      <button onClick={()=>setDisplayedPage(pageList.profilePage)} className="profile-button">Profile</button>
-      <button onClick={()=>{}} className="profile-button">Logout</button>
-    </div>}
-      </div>
-      
+      {isLoggedIn && (
+        <div>
+          <button
+            onClick={() => setDisplayedPage(pageList.profilePage)}
+            className="profile-button"
+          >
+            Profile
+          </button>
+          <button onClick={() => {}} className="profile-button">
+            Logout
+          </button>
+        </div>
+      )}
+    </div>
   );
 };
 export default NavigationBar;

@@ -3,7 +3,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useState } from "react";
 import {auth} from '../../../firebase';
 
-const Login = ({ setIsLoggedIn, setUserData }: any) => {
+const Login = ({ setIsLoggedIn, setUserData, budgetData, setBudgetData }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -45,6 +45,21 @@ const Login = ({ setIsLoggedIn, setUserData }: any) => {
       const data = await response.json();
       console.log(response, data)
       console.log('login failed handle that here')
+    }
+
+    if(response.status === 200){
+      const budgetDataResponse = await fetch("http://localhost:3000/budget-overview", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email }),
+      });
+      if(budgetDataResponse.status === 200){
+        const data = await budgetDataResponse.json();
+        setBudgetData(data.budgetData);
+      }
     }
   };
 

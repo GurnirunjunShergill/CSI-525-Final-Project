@@ -1,21 +1,10 @@
 import * as React from "react";
 import { useState } from "react";
-import { storeBudget } from "../../helper/storageHelper";
-import {
-  BudgetDataType,
-  BudgetItemType,
-  BudgetListType,
-} from "../../types/BudgetDataType";
-import { getDate, getWeek } from "../../helper/dataHelper";
-import { monthList } from "../../Constants";
+import { getDate } from "../../helper/dataHelper";
 import './addfinances.css';
+import { auth } from "../../firebase";
 
-interface AddFinancesPropsType {
-  budgetData: BudgetDataType;
-  setBudgetData: React.Dispatch<React.SetStateAction<BudgetDataType>>;
-}
-
-const AddFinances = ({ budgetData, setBudgetData }: AddFinancesPropsType) => {
+const AddFinances = ({ selectedBudget, budgetData, setBudgetData, userData, selectedBudgetIndex }: any) => {
   const defaultBudgetItemValue = {
     budgetItemName: "",
     budgetItemType: "food (groceries)",
@@ -32,14 +21,14 @@ const AddFinances = ({ budgetData, setBudgetData }: AddFinancesPropsType) => {
   };
   const updateBudgetDate = (event: any) => {
     setBudgetDate(event.target.value);
-    if (budgetData) {
+    if (selectedBudget) {
       const currentDateIndex = findDateBudgetIndex(
-        budgetData,
+        selectedBudget,
         event.target.value
       );
       if (currentDateIndex > -1)
         setListOfFinanceInputs([
-          ...budgetData?.budgets[currentDateIndex]?.budget,
+          ...selectedBudget?.budgets[currentDateIndex]?.budget,
         ]);
       else setListOfFinanceInputs([]);
     }
@@ -61,134 +50,105 @@ const AddFinances = ({ budgetData, setBudgetData }: AddFinancesPropsType) => {
     listOfFinanceInputs[index][valueToBeUpdated] = updatedValue;
   };
 
-  const getBudgetTotal = (listOfFinanceInputs: any) => {
-    let total = 0;
-    listOfFinanceInputs.map(
-      (budget: any) => (total = total + budget.budgetItemAmount)
-    );
-    return total;
-  };
-
-  const findDateBudgetIndex = (budgetData: any, budgetDate: string) => {
-    return budgetData?.budgets
-      ? budgetData.budgets
-          .map((budgetItem: any) => budgetItem.budgetDate)
+  const findDateBudgetIndex = (selectedBudget: any, budgetDate: string) => {
+    return selectedBudget?.budgets
+      ? selectedBudget.budgets
+          .map((budgetItem: any) => budgetItem.date)
           .indexOf(budgetDate)
       : -1;
   };
 
-  const handleSubmit = (event: any) => {
+  const handleSubmit = async(event: any) => {
     event.preventDefault();
-    const id: number =
-      budgetData && budgetData?.budgets ? budgetData?.budgets?.length : 0;
-    let udpatedBudget: BudgetItemType[];
-    const indexOfExistingDateData: number = findDateBudgetIndex(
-      budgetData,
-      budgetDate
-    );
-    const budgetTotal: number = getBudgetTotal(listOfFinanceInputs);
-    const week = getWeek(budgetDate);
-    console.log(week);
+    // const id: number =
+    //   selectedBudget && selectedBudget?.budgets ? selectedBudget?.budgets?.length : 0;
+    let updatedSelectedBudget = selectedBudget
+    // const indexOfExistingDateData: number = findDateBudgetIndex(
+    //   selectedBudget,
+    //   budgetDate
+    // );
+    // const budgetTotal: number = getBudgetTotal(listOfFinanceInputs);
+    // const week = getWeek(budgetDate);
+
+
+    if(selectedBudget?.budgets){
+      updatedSelectedBudget.budgets = [
+        ...updatedSelectedBudget.budgets,
+        {
+          date: budgetDate,
+          budget: listOfFinanceInputs
+        }
+      ]
+    }else{
+      updatedSelectedBudget.budgets = [
+        {
+          date: budgetDate,
+          budget: listOfFinanceInputs
+        }
+      ]
+    }
+
+    let updatedBudget = budgetData;
+    updatedBudget[selectedBudgetIndex] = updatedSelectedBudget
+
+    const token = await auth.currentUser.getIdToken();
+
+    const response = await fetch("http://localhost:3000/add-budget", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ email: userData.email, budgetData: updatedBudget, budgetName: selectedBudget['budget-name'] }),
+    });
+
+    if(response.status === 200){
+      const data = await response.json();
+      console.log(data)
+      setBudgetData(data.budgetData)
+    }
 
     // budget data doesn't exist
-    if (budgetData.notYetDefinedFlag)
-      udpatedBudget = [
-        {
-          id: id,
-          budgetTotal: budgetTotal,
-          budgetDate: budgetDate,
-          budget: listOfFinanceInputs,
-          budgetVariance: budgetData.goals.dailyBudget - budgetTotal,
-        },
-      ];
-    // budget data exists but the current date is not accounted for
-    else if (indexOfExistingDateData > -1) {
-      budgetData.budgets[indexOfExistingDateData].budget = listOfFinanceInputs;
-      budgetData.budgets[indexOfExistingDateData].budgetTotal = budgetTotal;
-      budgetData.budgets[indexOfExistingDateData].budgetVariance =
-        budgetData.goals.dailyBudget - budgetTotal;
+    // if (selectedBudget.notYetDefinedFlag)
+    //   updatedSelectedBudget = [
+    //     {
+    //       id: id,
+    //       budgetTotal: budgetTotal,
+    //       budgetDate: budgetDate,
+    //       budget: listOfFinanceInputs,
+    //       budgetVariance: selectedBudget.goal.dailyBudget - budgetTotal,
+    //     },
+    //   ];
+    // // budget data exists but the current date is not accounted for
+    // else if (indexOfExistingDateData > -1) {
+    //   selectedBudget.budgets[indexOfExistingDateData].budget = listOfFinanceInputs;
+    //   selectedBudget.budgets[indexOfExistingDateData].budgetTotal = budgetTotal;
+    //   selectedBudget.budgets[indexOfExistingDateData].budgetVariance =
+    //     selectedBudget.goal.dailyBudget - budgetTotal;
 
-      udpatedBudget = [...budgetData.budgets];
-      // budget data exists and the current date is accounted for and should be overwritten
-    } else
-      udpatedBudget = [
-        ...budgetData.budgets,
-        {
-          id: id,
-          budgetTotal: budgetTotal,
-          budgetDate: budgetDate,
-          budget: listOfFinanceInputs,
-          budgetVariance: budgetData.goals.dailyBudget - budgetTotal,
-        },
-      ];
+    //   updatedSelectedBudget = [...selectedBudget.budgets];
+    //   // budget data exists and the current date is accounted for and should be overwritten
+    // } else
+    //   updatedSelectedBudget = [
+    //     ...selectedBudget.budgets,
+    //     {
+    //       id: id,
+    //       budgetTotal: budgetTotal,
+    //       budgetDate: budgetDate,
+    //       budget: listOfFinanceInputs,
+    //       budgetVariance: selectedBudget.goal.dailyBudget - budgetTotal,
+    //     },
+    //   ];
 
-    const finalData: BudgetDataType = {
-      budgets: udpatedBudget,
-      ...(budgetData?.goals && { goals: { ...budgetData.goals } }),
-      notYetDefinedFlag: false,
-    };
+    // const finalData: BudgetDataType = {
+    //   budgets: updatedSelectedBudget,
+    //   ...(selectedBudget?.goal && { goal: { ...selectedBudget.goal } }),
+    //   notYetDefinedFlag: false,
+    // };
 
-    storeBudget(finalData);
-    setBudgetData(finalData);
-    setListOfFinanceInputs([]);
-  };
-
-  const handleSubmitV2 = (event: any) => {
-    event.preventDefault();
-    const id: number =
-      budgetData && budgetData?.budgets ? budgetData?.budgets?.length : 0;
-    const year = budgetDate.substring(0, 4);
-    const month = monthList[budgetDate.substring(6, 8)].name;
-    const week = getWeek(currentDate);
-
-    let udpatedBudget: BudgetItemType[];
-    const indexOfExistingDateData: number = findDateBudgetIndex(
-      budgetData,
-      budgetDate
-    );
-    const budgetTotal: number = getBudgetTotal(listOfFinanceInputs);
-
-    // budget data doesn't exist
-    if (budgetData.notYetDefinedFlag)
-      udpatedBudget = [
-        {
-          id: id,
-          budgetTotal: budgetTotal,
-          budgetDate: budgetDate,
-          budget: listOfFinanceInputs,
-          budgetVariance: budgetData.goals.dailyBudget - budgetTotal,
-        },
-      ];
-    // budget data exists but the current date is not accounted for
-    else if (indexOfExistingDateData > -1) {
-      budgetData.budgets[indexOfExistingDateData].budget = listOfFinanceInputs;
-      budgetData.budgets[indexOfExistingDateData].budgetTotal = budgetTotal;
-      budgetData.budgets[indexOfExistingDateData].budgetVariance =
-        budgetData.goals.dailyBudget - budgetTotal;
-
-      udpatedBudget = [...budgetData.budgets];
-      // budget data exists and the current date is accounted for and should be overwritten
-    } else
-      udpatedBudget = [
-        ...budgetData.budgets,
-        {
-          id: id,
-          budgetTotal: budgetTotal,
-          budgetDate: budgetDate,
-          budget: listOfFinanceInputs,
-          budgetVariance: budgetData.goals.dailyBudget - budgetTotal,
-        },
-      ];
-
-    const finalData: BudgetDataType = {
-      budgets: udpatedBudget,
-      ...(budgetData?.goals && { goals: { ...budgetData.goals } }),
-      notYetDefinedFlag: false,
-    };
-
-    storeBudget(finalData);
-    setBudgetData(finalData);
-    setListOfFinanceInputs([]);
+    // storeBudget(finalData);
+    // setBudgetData(finalData);
+    // setListOfFinanceInputs([]);
   };
 
   return (
