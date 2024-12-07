@@ -10,7 +10,6 @@ const AddFinances = ({ selectedBudget, budgetData, setBudgetData, userData, sele
     budgetItemType: "food (groceries)",
     budgetItemAmount: 0,
   };
-  // TODO add a type
   const [listOfFinanceInputs, setListOfFinanceInputs] = useState([]);
   const currentDate = getDate("today");
   const [budgetDate, setBudgetDate] = useState<string>(currentDate);
@@ -60,18 +59,19 @@ const AddFinances = ({ selectedBudget, budgetData, setBudgetData, userData, sele
 
   const handleSubmit = async(event: any) => {
     event.preventDefault();
-    // const id: number =
-    //   selectedBudget && selectedBudget?.budgets ? selectedBudget?.budgets?.length : 0;
     let updatedSelectedBudget = selectedBudget
-    // const indexOfExistingDateData: number = findDateBudgetIndex(
-    //   selectedBudget,
-    //   budgetDate
-    // );
-    // const budgetTotal: number = getBudgetTotal(listOfFinanceInputs);
-    // const week = getWeek(budgetDate);
+    const budgetDateIndex = findDateBudgetIndex(
+      selectedBudget,
+      budgetDate
+    );
 
-
-    if(selectedBudget?.budgets){
+    if(budgetDateIndex > -1){
+      updatedSelectedBudget.budgets[budgetDateIndex] = 
+      {
+        date: budgetDate,
+        budget: listOfFinanceInputs
+      }
+    }else{
       updatedSelectedBudget.budgets = [
         ...updatedSelectedBudget.budgets,
         {
@@ -79,15 +79,8 @@ const AddFinances = ({ selectedBudget, budgetData, setBudgetData, userData, sele
           budget: listOfFinanceInputs
         }
       ]
-    }else{
-      updatedSelectedBudget.budgets = [
-        {
-          date: budgetDate,
-          budget: listOfFinanceInputs
-        }
-      ]
     }
-
+    
     let updatedBudget = budgetData;
     updatedBudget[selectedBudgetIndex] = updatedSelectedBudget
 
@@ -104,51 +97,9 @@ const AddFinances = ({ selectedBudget, budgetData, setBudgetData, userData, sele
 
     if(response.status === 200){
       const data = await response.json();
-      console.log(data)
+      console.log('data', data)
       setBudgetData(data.budgetData)
     }
-
-    // budget data doesn't exist
-    // if (selectedBudget.notYetDefinedFlag)
-    //   updatedSelectedBudget = [
-    //     {
-    //       id: id,
-    //       budgetTotal: budgetTotal,
-    //       budgetDate: budgetDate,
-    //       budget: listOfFinanceInputs,
-    //       budgetVariance: selectedBudget.goal.dailyBudget - budgetTotal,
-    //     },
-    //   ];
-    // // budget data exists but the current date is not accounted for
-    // else if (indexOfExistingDateData > -1) {
-    //   selectedBudget.budgets[indexOfExistingDateData].budget = listOfFinanceInputs;
-    //   selectedBudget.budgets[indexOfExistingDateData].budgetTotal = budgetTotal;
-    //   selectedBudget.budgets[indexOfExistingDateData].budgetVariance =
-    //     selectedBudget.goal.dailyBudget - budgetTotal;
-
-    //   updatedSelectedBudget = [...selectedBudget.budgets];
-    //   // budget data exists and the current date is accounted for and should be overwritten
-    // } else
-    //   updatedSelectedBudget = [
-    //     ...selectedBudget.budgets,
-    //     {
-    //       id: id,
-    //       budgetTotal: budgetTotal,
-    //       budgetDate: budgetDate,
-    //       budget: listOfFinanceInputs,
-    //       budgetVariance: selectedBudget.goal.dailyBudget - budgetTotal,
-    //     },
-    //   ];
-
-    // const finalData: BudgetDataType = {
-    //   budgets: updatedSelectedBudget,
-    //   ...(selectedBudget?.goal && { goal: { ...selectedBudget.goal } }),
-    //   notYetDefinedFlag: false,
-    // };
-
-    // storeBudget(finalData);
-    // setBudgetData(finalData);
-    // setListOfFinanceInputs([]);
   };
 
   return (

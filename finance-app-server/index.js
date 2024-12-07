@@ -249,7 +249,7 @@ const addGoal = async ({email, goalData, budgetName}) => {
 const getBudgetData = async(email) =>{
   const existingBudgets = await getAllBudgets();
   const {budgets} = existingBudgets.data();
-  const filteredBudgets = budgets.filter((budget) => budget?.users?.owner === email || budget?.users?.['read-access'] === email || budget?.users?.['write-access'] === email);
+  const filteredBudgets = budgets.filter((budget) => budget?.users?.owner === email || budget?.users?.['read-access'].includes(email)|| budget?.users?.['write-access'].includes(email));
   return filteredBudgets;
 }
 
@@ -266,11 +266,6 @@ const updateGoal = async (email, goalData, budgetName) => {
 
 const addToExistingBudget = async ({email, budgetData, budgetName}) =>{
   const collection = database.collection('database');
-  // you have the actual budget data in the database
-  // you have the updated budget data
-  // you need to combine them and then add them to the database
-  // we need to replace the index of the budget with the updated budget data
-    // and then we need to update the database with the new budget
   await collection.doc('budget').set(
     {
       budgets: [...budgetData]
@@ -296,8 +291,10 @@ app.post('/budget-overview', async(req, res) =>{
   return res.status(200).json({budgetData: budgetData});
 })
 
-app.put('/update-user', (req, res) => {
-  res.send('Got a PUT request at /user')
+app.post('/edit-budget', async(req, res) => {
+  const {budgetData} = req.body;
+  await addToExistingBudget({budgetData: budgetData});
+  return res.status(200).json({budgetData: budgetData});
 })
 
 // app.delete('/delete-user', async (req, res) => {

@@ -10,13 +10,6 @@ import './home.css';
 import Profile from "../account-pages/profile/Profile";
 import { useState } from "react";
 
-// home page should include 
-// add finance tab
-// overview tab
-// goal tab
-// general tab
-    // should include 
-
 interface displayedPagePropsType {
     setDisplayedPage: React.Dispatch<React.SetStateAction<string>>;
     displayedPage: string;
@@ -38,7 +31,7 @@ const Home = ({
     const pages = {
         AddFinance: <AddFinances selectedBudgetIndex={selectedBudgetIndex} budgetData={budgetData} setBudgetData={setBudgetData} userData={userData} selectedBudget={selectedBudget} setSelectedBudget={setSelectedBudget}/>,
         Goals: <Goals userData={userData} budgetData={budgetData} setBudgetData={setBudgetData}/>,
-        BudgetOverview: <BudgetOverview setSelectedBudgetIndex={setSelectedBudgetIndex} setDisplayedPage={setDisplayedPage} budgetData={budgetData} setSelectedBudget={setSelectedBudget} selectedBudget={selectedBudget}/>,
+        BudgetOverview: <BudgetOverview setBudgetData={setBudgetData} selectedBudgetIndex={selectedBudgetIndex} setSelectedBudgetIndex={setSelectedBudgetIndex} setDisplayedPage={setDisplayedPage} budgetData={budgetData} setSelectedBudget={setSelectedBudget} selectedBudget={selectedBudget} userData={userData}/>,
         Profile: <Profile setUserData={setUserData} userData={userData}/>
     }
 
