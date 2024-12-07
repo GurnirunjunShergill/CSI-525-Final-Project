@@ -58,6 +58,7 @@ const Login = ({ setIsLoggedIn, setUserData, budgetData, setBudgetData }: any) =
       });
       if(budgetDataResponse.status === 200){
         const data = await budgetDataResponse.json();
+        console.log(data, data.budgetData)
         setBudgetData(data.budgetData);
       }
     }

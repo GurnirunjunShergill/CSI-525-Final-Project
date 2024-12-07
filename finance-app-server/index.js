@@ -250,7 +250,7 @@ const getBudgetData = async(email) =>{
   const existingBudgets = await getAllBudgets();
   const {budgets} = existingBudgets.data();
   const filteredBudgets = budgets.filter((budget) => budget?.users?.owner === email || budget?.users?.['read-access'].includes(email)|| budget?.users?.['write-access'].includes(email));
-  return filteredBudgets;
+  return [filteredBudgets, budgets];
 }
 
 const updateGoal = async (email, goalData, budgetName) => {
@@ -280,14 +280,57 @@ app.post('/add-goal', async (req, res) => {
 })
 
 app.post('/add-budget', async (req, res) => {
-  const {email, budgetData, budgetName} = req.body;
-  await addToExistingBudget({email: email, budgetData: budgetData, budgetName: budgetName});
-  return res.status(200).json({budgetData: budgetData});
+  const {email, budgetDataToUpdate, budgetName} = req.body;
+  const [budgetData, allBudgets] = await getBudgetData(email);
+  const updatedAllBudgets = allBudgets;
+  const budgetIndexToUpdate = updatedAllBudgets.findIndex((budget)=>
+    budget.users.owner === email && budget['budget-name'] === budgetName
+  )
+  updatedAllBudgets[budgetIndexToUpdate] = budgetDataToUpdate;
+  await addToExistingBudget({budgetData: updatedAllBudgets});
+  return res.status(200).json({budgetData: budgetData, allBudgets: allBudgets});
+})
+
+app.post('/add-comment', async (req, res) => {
+  const {email, budgetDataToUpdate, budgetName} = req.body;
+  const [budgetData, allBudgets] = await getBudgetData(email);
+  const updatedAllBudgets = allBudgets;
+  const budgetIndexToUpdate = updatedAllBudgets.findIndex((budget)=>
+    budget.users.owner === email && budget['budget-name'] === budgetName
+  )
+  updatedAllBudgets[budgetIndexToUpdate] = budgetDataToUpdate;
+  await addToExistingBudget({budgetData: updatedAllBudgets});
+  const [returnBudgetData,] = await getBudgetData(email);
+  return res.status(200).json({budgetData: returnBudgetData, allBudgets: allBudgets});
 })
 
 app.post('/budget-overview', async(req, res) =>{
   const {email} = req.body;
-  const budgetData = await getBudgetData(email);
+  const [budgetData, allBudgets] = await getBudgetData(email);
+  return res.status(200).json({budgetData: budgetData, allBudgets: allBudgets});
+})
+
+app.post('/budget-name-update', async(req, res) =>{
+  const {email, budgetName, budgetNameUpdated} = req.body;
+  const [budgetData, allBudgets] = await getBudgetData(email);
+  const updatedAllBudgets = allBudgets;
+  const budgetIndexToUpdate = updatedAllBudgets.findIndex((budget)=>
+    budget.users.owner === email && budget['budget-name'] === budgetName
+  )
+  updatedAllBudgets[budgetIndexToUpdate]['budget-name'] = budgetNameUpdated;
+  await addToExistingBudget({budgetData: updatedAllBudgets});
+  return res.status(200).json({budgetData: budgetData, allBudgets: allBudgets});
+})
+
+app.post('/edit-goal', async(req, res) =>{
+  const {email, budgetName, budgetDataToUpdate} = req.body;
+  const [budgetData, allBudgets] = await getBudgetData(email);
+  const updatedAllBudgets = allBudgets;
+  const budgetIndexToUpdate = updatedAllBudgets.findIndex((budget)=>
+    budget.users.owner === email && budget['budget-name'] === budgetName
+  )
+  updatedAllBudgets[budgetIndexToUpdate] = budgetDataToUpdate;
+  await addToExistingBudget({budgetData: updatedAllBudgets});
   return res.status(200).json({budgetData: budgetData});
 })
 
@@ -295,6 +338,70 @@ app.post('/edit-budget', async(req, res) => {
   const {budgetData} = req.body;
   await addToExistingBudget({budgetData: budgetData});
   return res.status(200).json({budgetData: budgetData});
+})
+
+app.post('/delete-budget', async(req, res) =>{
+  const {email, budgetName} = req.body;
+  const [budgetData, allBudgets] = await getBudgetData(email);
+  const budgetIndexToUpdate = allBudgets.findIndex((budget)=>
+    budget.users.owner === email && budget['budget-name'] === budgetName
+  )
+  const updatedAllBudgets = allBudgets.filter((_, index) => index !== budgetIndexToUpdate);
+  await addToExistingBudget({budgetData: updatedAllBudgets});
+  const [returnBudgetData,] = await getBudgetData(email);
+  return res.status(200).json({budgetData: returnBudgetData});
+})
+
+app.post('/delete-comment', async(req, res) =>{
+  const {email, budgetName, budgetDataToUpdate} = req.body;
+  const [budgetData, allBudgets] = await getBudgetData(email);
+  const updatedAllBudgets = allBudgets;
+  const budgetIndexToUpdate = updatedAllBudgets.findIndex((budget)=>
+    budget.users.owner === email && budget['budget-name'] === budgetName
+  )
+  updatedAllBudgets[budgetIndexToUpdate] = budgetDataToUpdate;
+  await addToExistingBudget({budgetData: updatedAllBudgets});
+  const [returnBudgetData,] = await getBudgetData(email);
+  return res.status(200).json({budgetData: returnBudgetData});
+})
+
+app.post('/edit-comment', async (req, res) => {
+  const {email, budgetDataToUpdate, budgetName} = req.body;
+  const [budgetData, allBudgets] = await getBudgetData(email);
+  const updatedAllBudgets = allBudgets;
+  const budgetIndexToUpdate = updatedAllBudgets.findIndex((budget)=>
+    budget.users.owner === email && budget['budget-name'] === budgetName
+  )
+  updatedAllBudgets[budgetIndexToUpdate] = budgetDataToUpdate;
+  await addToExistingBudget({budgetData: updatedAllBudgets});
+  const [returnBudgetData,] = await getBudgetData(email);
+  return res.status(200).json({budgetData: returnBudgetData, allBudgets: allBudgets});
+})
+
+app.post('/add-user-budget', async (req, res) => {
+  const {email, budgetDataToUpdate, budgetName} = req.body;
+  const [budgetData, allBudgets] = await getBudgetData(email);
+  const updatedAllBudgets = allBudgets;
+  const budgetIndexToUpdate = updatedAllBudgets.findIndex((budget)=>
+    budget.users.owner === email && budget['budget-name'] === budgetName
+  )
+  updatedAllBudgets[budgetIndexToUpdate] = budgetDataToUpdate;
+  await addToExistingBudget({budgetData: updatedAllBudgets});
+  const [returnBudgetData,] = await getBudgetData(email);
+  return res.status(200).json({budgetData: returnBudgetData, allBudgets: allBudgets});
+})
+
+app.post('/remove-user-budget', async (req, res) => {
+  const {email, budgetDataToUpdate, budgetName} = req.body;
+  const [budgetData, allBudgets] = await getBudgetData(email);
+  const updatedAllBudgets = allBudgets;
+  const budgetIndexToUpdate = updatedAllBudgets.findIndex((budget)=>
+    budget.users.owner === email && budget['budget-name'] === budgetName
+  )
+  updatedAllBudgets[budgetIndexToUpdate] = budgetDataToUpdate;
+  await addToExistingBudget({budgetData: updatedAllBudgets});
+  const [returnBudgetData,] = await getBudgetData(email);
+  return res.status(200).json({budgetData: returnBudgetData, allBudgets: allBudgets});
 })
 
 // app.delete('/delete-user', async (req, res) => {

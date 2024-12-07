@@ -4,7 +4,7 @@ import { getDate } from "../../helper/dataHelper";
 import './addfinances.css';
 import { auth } from "../../firebase";
 
-const AddFinances = ({ selectedBudget, budgetData, setBudgetData, userData, selectedBudgetIndex }: any) => {
+const AddFinances = ({ selectedBudget, budgetData, setBudgetData, userData, selectedBudgetIndex, allBudgets }: any) => {
   const defaultBudgetItemValue = {
     budgetItemName: "",
     budgetItemType: "food (groceries)",
@@ -92,7 +92,7 @@ const AddFinances = ({ selectedBudget, budgetData, setBudgetData, userData, sele
         "Content-Type": "application/json",
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({ email: userData.email, budgetData: updatedBudget, budgetName: selectedBudget['budget-name'] }),
+      body: JSON.stringify({ email: userData.email, budgetDataToUpdate: updatedBudget[selectedBudgetIndex], budgetName: selectedBudget['budget-name'] }),
     });
 
     if(response.status === 200){
@@ -102,17 +102,25 @@ const AddFinances = ({ selectedBudget, budgetData, setBudgetData, userData, sele
     }
   };
 
+  const deleteBudgetItem = (event:any, indexToBeRemoved:number) =>{
+    event.preventDefault();
+    setListOfFinanceInputs((prevItems) => prevItems.filter((_,index) => index !== indexToBeRemoved));
+  }
+  console.log(listOfFinanceInputs)
+
   return (
     <div className='add-finances'>
       <form>
         <label>Date of Entry</label>
         <input type="date" onChange={updateBudgetDate} />
         {listOfFinanceInputs.map((item, index) => {
+          const {budgetItemName, budgetItemType, budgetItemAmount} = item;
+          console.log(budgetItemName, budgetItemType, budgetItemAmount)
           return (
             <div className='add-finance-item' id={`${index}`} key={index}>
               <label>Budget Item Name</label>
               <input
-                defaultValue={item.budgetItemName}
+                value={budgetItemName}
                 onChange={() =>
                   updateBudgetItem({
                     event,
@@ -123,7 +131,7 @@ const AddFinances = ({ selectedBudget, budgetData, setBudgetData, userData, sele
               />
               <label>Budget Item Type</label>
               <select
-                defaultValue={item.budgetItemType}
+                value={budgetItemType}
                 onChange={() =>
                   updateBudgetItem({
                     event,
@@ -141,7 +149,7 @@ const AddFinances = ({ selectedBudget, budgetData, setBudgetData, userData, sele
               </select>
               <label>Budget Item Amount</label>
               <input
-                defaultValue={item.budgetItemAmount}
+                value={budgetItemAmount}
                 type="number"
                 onChange={() =>
                   updateBudgetItem({
@@ -151,6 +159,7 @@ const AddFinances = ({ selectedBudget, budgetData, setBudgetData, userData, sele
                   })
                 }
               />
+              <button onClick={(event:any)=>deleteBudgetItem(event,index)}>delete item</button>
             </div>
           );
         })}

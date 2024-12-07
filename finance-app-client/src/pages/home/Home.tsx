@@ -27,13 +27,23 @@ const Home = ({
     const [budgetData, setBudgetData] = useState<any>()
     const [selectedBudget, setSelectedBudget] = useState();
     const [selectedBudgetIndex, setSelectedBudgetIndex] = useState();
+    const [selectedBudgetItem, setSelectedBudgetItem] = useState();
+    const [selectedBudgetItemIndex, setSelectedBudgetItemIndex] = useState();
 
     const pages = {
         AddFinance: <AddFinances selectedBudgetIndex={selectedBudgetIndex} budgetData={budgetData} setBudgetData={setBudgetData} userData={userData} selectedBudget={selectedBudget} setSelectedBudget={setSelectedBudget}/>,
         Goals: <Goals userData={userData} budgetData={budgetData} setBudgetData={setBudgetData}/>,
-        BudgetOverview: <BudgetOverview setBudgetData={setBudgetData} selectedBudgetIndex={selectedBudgetIndex} setSelectedBudgetIndex={setSelectedBudgetIndex} setDisplayedPage={setDisplayedPage} budgetData={budgetData} setSelectedBudget={setSelectedBudget} selectedBudget={selectedBudget} userData={userData}/>,
-        Profile: <Profile setUserData={setUserData} userData={userData}/>
+        BudgetOverview: <BudgetOverview 
+        setSelectedBudgetItemIndex = {setSelectedBudgetItemIndex}
+         setSelectedBudgetItem = {setSelectedBudgetItem} setBudgetData={setBudgetData} selectedBudgetIndex={selectedBudgetIndex} setSelectedBudgetIndex={setSelectedBudgetIndex} setDisplayedPage={setDisplayedPage} budgetData={budgetData} setSelectedBudget={setSelectedBudget} selectedBudget={selectedBudget} userData={userData}/>,
+        Profile: <Profile setUserData={setUserData} userData={userData}/>,
     }
+
+    // React.useEffect(()=>{
+    //     if(selectedBudgetItemIndex){
+    //         setSelectedBudget(budgetData[selectedBudgetItemIndex])
+    //     }
+    // },[budgetData])
 
     return(
         <>
